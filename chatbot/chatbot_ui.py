@@ -20,20 +20,14 @@ def checking_model_service():
     ready = False
     while not ready:
         try:
-            request_cpp = requests.get(f'{model_service}/models')
-            request_ollama = requests.get(f'{model_service[:-2]}api/tags')
-            if request_cpp.status_code == 200:
-                server = "Llamacpp_Python"
-                ready = True
-            elif request_ollama.status_code == 200:
-                server = "Ollama"
-                ready = True        
+            request= requests.get(f'{model_service}/models')
+            if request.status_code == 200:
+                ready = True  
         except:
             pass
         time.sleep(1)
-    print(f"{server} Model Service Available")
+    print(f"Model Service Available")
     print(f"{time.time()-start} seconds")
-    return server 
 
 def get_models():
     try:
@@ -44,7 +38,7 @@ def get_models():
         return None
 
 with st.spinner("Checking Model Service Availability..."):
-    server = checking_model_service()
+    checking_model_service()
 
 def enableInput():
     st.session_state["input_disabled"] = False
@@ -67,17 +61,12 @@ def memory():
     memory = ConversationBufferWindowMemory(return_messages=True,k=3)
     return memory
 
-model_name = "" 
 
-if server == "Ollama":
-    models = get_models()
-    with st.sidebar:
-        model_name = st.radio(label="Select Model",
-            options=models)
+model = request["data"]["id"]
 
 llm = ChatOpenAI(base_url=model_service, 
         api_key="sk-no-key-required",
-        model=model_name,
+        model="instructlab/granite-7b-lab",
         streaming=True,
         callbacks=[StreamlitCallbackHandler(st.empty(),
                                             expand_new_thoughts=True,
